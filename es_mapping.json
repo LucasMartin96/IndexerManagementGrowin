@@ -1,0 +1,190 @@
+{
+  "mappings": {
+    "properties": {
+      "id": {
+        "type": "long"
+      },
+      "scraper": {
+        "type": "integer"
+      },
+      "idexterno": {
+        "type": "keyword"
+      },
+      "referencia": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        }
+      },
+      "objeto": {
+        "type": "text",
+        "analyzer": "standard",
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        }
+      },
+      "agencia": {
+        "type": "text",
+        "analyzer": "standard",
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        }
+      },
+      "oficina": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        }
+      },
+      "link": {
+        "type": "keyword"
+      },
+      "publicado": {
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||strict_date_optional_time||epoch_millis"
+      },
+      "actualizado": {
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||strict_date_optional_time||epoch_millis"
+      },
+      "apertura": {
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||strict_date_optional_time||epoch_millis"
+      },
+      "cierre": {
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||strict_date_optional_time||epoch_millis"
+      },
+      "pais": {
+        "type": "keyword"
+      },
+      "pais_nombre": {
+        "type": "keyword"
+      },
+      "pais_id": {
+        "type": "integer"
+      },
+      "rubro": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        }
+      },
+      "subrubro": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        }
+      },
+      "tipo": {
+        "type": "keyword"
+      },
+      "tipo_id": {
+        "type": "integer"
+      },
+      "tipo_cliente_id": {
+        "type": "keyword"
+      },
+      "contacto": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        }
+      },
+      "observaciones": {
+        "type": "text"
+      },
+      "categoria": {
+        "type": "integer"
+      },
+      "cargado": {
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||strict_date_optional_time||epoch_millis"
+      },
+      "editado": {
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||strict_date_optional_time||epoch_millis"
+      },
+      "visible": {
+        "type": "boolean"
+      },
+      "attachs": {
+        "type": "keyword"
+      },
+      "monto": {
+        "type": "float"
+      },
+      "divisaSimboloISO": {
+        "type": "keyword"
+      },
+      "tag_ids": {
+        "type": "integer"
+      },
+      "tags": {
+        "type": "nested",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "descripcion": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword"
+              }
+            }
+          }
+        }
+      },
+      "mercado_ids": {
+        "type": "integer"
+      },
+      "tipo_licit_ids": {
+        "type": "object",
+        "properties": {
+          "esAR": {
+            "type": "integer"
+          },
+          "ptBR": {
+            "type": "integer"
+          },
+          "enUS": {
+            "type": "integer"
+          }
+        }
+      },
+      "tasaCambioUSD": {
+        "type": "float"
+      },
+      "vigente": {
+        "type": "boolean"
+      }
+    }
+  },
+  "settings": {
+    "number_of_shards": 1,
+    "number_of_replicas": 0,
+    "analysis": {
+      "analyzer": {
+        "standard": {
+          "type": "standard"
+        }
+      }
+    }
+  }
+}
+
