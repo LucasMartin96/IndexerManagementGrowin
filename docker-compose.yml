@@ -59,10 +59,12 @@ services:
       - growin-network
     volumes:
       - ./logs:/app/logs
+      - sqlite-db-data:/app/data
     restart: unless-stopped
 
 volumes:
   elasticsearch-data:
+  sqlite-db-data:
 
 networks:
   growin-network:
