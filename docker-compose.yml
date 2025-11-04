@@ -1,30 +1,30 @@
 version: '3.8'
 
 services:
-  # Elasticsearch
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
-    container_name: growin-elasticsearch
-    environment:
-      - discovery.type=single-node
-      - ES_JAVA_OPTS=-Xms768m -Xmx768m
-      - xpack.security.enabled=true
-      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD:-changeme}
-      - cluster.name=growin-cluster
-      - node.name=growin-node
-    ports:
-      - "9200:9200"
-      - "9300:9300"
-    volumes:
-      - elasticsearch-data:/usr/share/elasticsearch/data
-    networks:
-      - growin-network
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f -u elastic:$ELASTIC_PASSWORD http://localhost:9200/_cluster/health || exit 1"]
-      interval: 30s
-      timeout: 30s
-      retries: 10
-      start_period: 60s
+  # Elasticsearch (disabled - uncomment when needed)
+  # elasticsearch:
+  #   image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+  #   container_name: growin-elasticsearch
+  #   environment:
+  #     - discovery.type=single-node
+  #     - ES_JAVA_OPTS=-Xms768m -Xmx768m
+  #     - xpack.security.enabled=true
+  #     - ELASTIC_PASSWORD=${ELASTIC_PASSWORD:-changeme}
+  #     - cluster.name=growin-cluster
+  #     - node.name=growin-node
+  #   ports:
+  #     - "9200:9200"
+  #     - "9300:9300"
+  #   volumes:
+  #     - elasticsearch-data:/usr/share/elasticsearch/data
+  #   networks:
+  #     - growin-network
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "curl -f -u elastic:$ELASTIC_PASSWORD http://localhost:9200/_cluster/health || exit 1"]
+  #     interval: 30s
+  #     timeout: 30s
+  #     retries: 10
+  #     start_period: 60s
 
   # Kibana (disabled to save memory - uncomment if needed)
   # kibana:
@@ -53,11 +53,15 @@ services:
     env_file:
       - .env
     environment:
-      - ELASTICSEARCH_HOST=elasticsearch
       - DB_HOST=${DB_HOST:-localhost}
-    depends_on:
-      elasticsearch:
-        condition: service_healthy
+      # ELASTICSEARCH_HOST is set via .env file
+      # Options:
+      #   - For local docker: "elasticsearch" (when container is enabled)
+      #   - For external service: "https://your-cluster.es.amazonaws.com" or "your-elasticsearch-host.com"
+      #   - For localhost: "localhost"
+    # depends_on:
+    #   elasticsearch:
+    #     condition: service_healthy
     networks:
       - growin-network
     volumes:

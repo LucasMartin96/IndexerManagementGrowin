@@ -102,21 +102,16 @@ def create_app() -> FastAPI:
         except Exception as e:
             logger.error(f"Failed to initialize SQLite database: {str(e)}")
         
-        # Initialize Elasticsearch
+        # Initialize Elasticsearch (optional - won't fail startup if unavailable)
         try:
-            mapping_path = Path("es_mapping.json")
-            if mapping_path.exists():
-                with open(mapping_path, 'r') as f:
-                    mapping = json.load(f)
-                initialize_elasticsearch(mapping_file="es_mapping.json")
+            es_client = initialize_elasticsearch(mapping_file="es_mapping.json")
+            if es_client:
+                logger.info("Elasticsearch connection established")
             else:
-                logger.warning("es_mapping.json not found, creating index with default mapping")
-                initialize_elasticsearch(mapping_file=None)
-            
-            logger.info("Elasticsearch connection established")
+                logger.warning("Elasticsearch not available - service will continue but Elasticsearch endpoints will fail")
         except Exception as e:
-            logger.error(f"Failed to initialize Elasticsearch: {str(e)}")
-            # Don't fail startup - allow service to start but endpoints will fail
+            logger.warning(f"Elasticsearch initialization failed: {str(e)}")
+            logger.info("FastAPI will continue without Elasticsearch")
         
         # Set executor for indexer routes
         set_executor(executor)

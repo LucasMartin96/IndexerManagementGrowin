@@ -19,11 +19,17 @@ class Settings(BaseSettings):
     DB_PASSWORD: str = ""
     
     # Elasticsearch Configuration
+    # ELASTICSEARCH_HOST can be:
+    #   - Hostname/IP: "localhost" or "elasticsearch" (for docker) or "my-cluster.es.amazonaws.com"
+    #   - Full URL: "https://my-cluster.es.amazonaws.com" or "http://elasticsearch:9200"
     ELASTICSEARCH_HOST: str = "localhost"
     ELASTICSEARCH_PORT: int = 9200
     ELASTICSEARCH_INDEX: str = "growin_licitaciones"
     ELASTICSEARCH_USERNAME: str | None = None
     ELASTICSEARCH_PASSWORD: str | None = None
+    # Optional: Use API key instead of username/password
+    # Format: "id:api_key" (e.g., "VuaCfGcBCdbkQm-e5aOx:ui2lp2axTNmsyakw9tvNnw")
+    ELASTICSEARCH_API_KEY: str | None = None
     
     # FastAPI Configuration
     FASTAPI_HOST: str = "0.0.0.0"

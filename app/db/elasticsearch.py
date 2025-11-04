@@ -14,40 +14,58 @@ logger = logging.getLogger(__name__)
 es_client = None
 
 
-def es_client_init() -> Elasticsearch:
+def es_client_init() -> Elasticsearch | None:
     """
     Initialize Elasticsearch client
     
     Returns:
-        Elasticsearch: Initialized ES client
+        Elasticsearch: Initialized ES client, or None if connection fails
     """
     global es_client
     
     # Build connection parameters
-    # Elasticsearch needs full URL with scheme (http:// or https://)
-    es_url = f"http://{settings.ELASTICSEARCH_HOST}:{settings.ELASTICSEARCH_PORT}"
+    # Support both http:// and https:// URLs, or host:port format
+    if settings.ELASTICSEARCH_HOST.startswith(('http://', 'https://')):
+        # Full URL provided (e.g., https://my-cluster.es.amazonaws.com)
+        es_url = settings.ELASTICSEARCH_HOST
+        if settings.ELASTICSEARCH_PORT and settings.ELASTICSEARCH_PORT not in [80, 443]:
+            # Port is specified and not default, add it to URL
+            es_url = f"{settings.ELASTICSEARCH_HOST}:{settings.ELASTICSEARCH_PORT}"
+    else:
+        # Host:port format (e.g., localhost:9200 or elasticsearch:9200)
+        scheme = "https" if settings.ELASTICSEARCH_PORT == 443 else "http"
+        es_url = f"{scheme}://{settings.ELASTICSEARCH_HOST}:{settings.ELASTICSEARCH_PORT}"
+    
     es_config = {
-        "hosts": [es_url]
+        "hosts": [es_url],
+        "request_timeout": 30,
+        "max_retries": 3
     }
     
-    # Add authentication if provided
-    if settings.ELASTICSEARCH_USERNAME and settings.ELASTICSEARCH_PASSWORD:
+    # Add authentication - API key takes precedence over username/password
+    if settings.ELASTICSEARCH_API_KEY:
+        es_config["api_key"] = settings.ELASTICSEARCH_API_KEY
+        logger.info("Using Elasticsearch API key authentication")
+    elif settings.ELASTICSEARCH_USERNAME and settings.ELASTICSEARCH_PASSWORD:
         es_config["basic_auth"] = (
             settings.ELASTICSEARCH_USERNAME,
             settings.ELASTICSEARCH_PASSWORD
         )
+        logger.info("Using Elasticsearch username/password authentication")
     
     try:
         client = Elasticsearch(**es_config)
-        # Test connection
-        if not client.ping():
-            raise ConnectionError("Failed to ping Elasticsearch")
+        # Test connection with timeout
+        if not client.ping(request_timeout=5):
+            logger.warning(f"Elasticsearch ping failed at {es_url}")
+            return None
         
-        logger.info(f"Elasticsearch connection established: {settings.ELASTICSEARCH_HOST}:{settings.ELASTICSEARCH_PORT}")
+        logger.info(f"Elasticsearch connection established: {es_url}")
         return client
     except Exception as e:
-        logger.error(f"Failed to initialize Elasticsearch: {str(e)}")
-        raise
+        logger.warning(f"Failed to connect to Elasticsearch at {es_url}: {str(e)}")
+        logger.info("FastAPI will continue without Elasticsearch. Endpoints requiring Elasticsearch will return errors.")
+        return None
 
 
 def es_create_index(client: Elasticsearch, index_name: str, mapping: dict = None):
@@ -103,12 +121,12 @@ def load_es_mapping(mapping_file: str = "es_mapping.json") -> dict:
         return None
 
 
-def get_es_client() -> Elasticsearch:
+def get_es_client() -> Elasticsearch | None:
     """
     Get global Elasticsearch client
     
     Returns:
-        Elasticsearch: ES client instance
+        Elasticsearch: ES client instance, or None if not available
     """
     global es_client
     if es_client is None:
@@ -116,7 +134,7 @@ def get_es_client() -> Elasticsearch:
     return es_client
 
 
-def initialize_elasticsearch(mapping_file: str = "es_mapping.json") -> Elasticsearch:
+def initialize_elasticsearch(mapping_file: str = "es_mapping.json") -> Elasticsearch | None:
     """
     Initialize Elasticsearch with mapping
     
@@ -124,9 +142,13 @@ def initialize_elasticsearch(mapping_file: str = "es_mapping.json") -> Elasticse
         mapping_file: Path to mapping file
         
     Returns:
-        Elasticsearch: Initialized ES client
+        Elasticsearch: Initialized ES client, or None if connection fails
     """
     client = es_client_init()
+    
+    if client is None:
+        logger.warning("Cannot initialize Elasticsearch index - client not available")
+        return None
     
     # Load and apply mapping
     mapping = load_es_mapping(mapping_file)
